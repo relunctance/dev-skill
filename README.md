@@ -1,4 +1,7 @@
 # dev-skill
+[![version](https://img.shields.io/badge/version-1.0.0-green.svg)]()
+[![category](https://img.shields.io/badge/category-development-blue.svg)]()
+[![platforms](https://img.shields.io/badge/platforms-claude code%20%7C%20openclaw%20%7C%20hermes%20%7C%20cursor%20%7C%20vscode-blue.svg)]()
 
 开发类 Skill 套件 — 一键安装所有开发流程相关的 skill。
 
