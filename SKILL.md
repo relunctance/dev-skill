@@ -7,7 +7,6 @@ license: MIT
 category: development
 tags:
   - development
-  - workflow
   - skill-suite
 metadata:
   hermes:
@@ -17,8 +16,6 @@ metadata:
       hermes: true
       cursor: true
       vscode: true
-  depends_on:
-    - base-skill
 ---
 
 # dev-skill
@@ -39,18 +36,6 @@ metadata:
 git clone https://github.com/relunctance/dev-skill.git ~/repos/dev-skill
 cd ~/repos/dev-skill
 bash scripts/setup.sh
-```
-
-## 工作流
-
-```
-制定 PLAN（PLAN.md）
-    ↓
-提交评审（plan-review-skill）
-    ↓
-批准后任务拆解（task-split-skill）  ← base-skill 已包含
-    ↓
-执行开发（git-standards-skill）      ← base-skill 已包含
 ```
 
 ## 触发条件
