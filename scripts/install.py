@@ -7,8 +7,7 @@ dev-skill install.py — 一键安装所有开发类 skill
 """
 
 import os
-import platform
-import pwd
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -16,7 +15,60 @@ from pathlib import Path
 
 def _real_home() -> Path:
     """解决 WSL Hermes profile 下 Path.home() 指向 profile 的问题"""
+    import pwd
     return Path(pwd.getpwuid(os.getuid()).pw_dir)
+
+
+def _find_python() -> str:
+    """找可用的 python3"""
+    for name in ("python3", "python"):
+        if shutil.which(name):
+            return name
+    return ""
+
+
+def _find_git() -> str:
+    return shutil.which("git") or ""
+
+
+def _find_pip() -> str:
+    """找可用的 pip（pip3 > pip > pipx）"""
+    for name in ("pip3", "pip", "pipx"):
+        if shutil.which(name):
+            return name
+    return ""
+
+
+def check_env():
+    """检查环境，返回 (ok, instructions)"""
+    issues = []
+    instructions = []
+
+    py = _find_python()
+    if not py:
+        issues.append("python3")
+        instructions.append("安装 Python3: https://www.python.org/downloads/")
+    else:
+        v = subprocess.run([py, "--version"], capture_output=True, text=True)
+        print(f"  python: {v.stdout.strip()} ({py})")
+
+    git = _find_git()
+    if not git:
+        issues.append("git")
+        instructions.append("安装 Git: https://git-scm.com/downloads")
+    else:
+        v = subprocess.run(["git", "--version"], capture_output=True, text=True)
+        print(f"  git:    {v.stdout.strip()}")
+
+    pip = _find_pip()
+    if not pip:
+        issues.append("pip")
+        instructions.append("安装 pip: python3 -m ensurepip --upgrade 或 https://pip.pypa.io/en/stable/installation/")
+    else:
+        v = subprocess.run([pip, "--version"], capture_output=True, text=True)
+        print(f"  pip:    {v.stdout.strip()} ({pip})")
+
+    return issues, instructions
 
 
 REPOS_DIR = _real_home() / "repos"
@@ -32,7 +84,6 @@ SKILLS = [
 
 
 def run(cmd: list[str], cwd: Path | None = None) -> None:
-    print(f"  $ {' '.join(cmd)}")
     subprocess.run(cmd, cwd=cwd, check=True)
 
 
@@ -40,7 +91,6 @@ def install_skill(name: str, url: str) -> None:
     repo_dir = REPOS_DIR / name
     skill_link = SKILLS_DIR / name / "SKILL.md"
 
-    # Clone or pull
     if repo_dir.exists():
         print(f"[UPDATE] {name}")
         run(["git", "-C", str(repo_dir), "pull", "--ff-only"], cwd=repo_dir)
@@ -63,12 +113,32 @@ def install_skill(name: str, url: str) -> None:
 
 
 def main():
+    print("=== dev-skill 环境检查 ===")
+    issues, instructions = check_env()
+
+    print()
+    if issues:
+        print("❌ 环境缺少必要组件：")
+        for issue in issues:
+            print(f"  - {issue}")
+        print()
+        print("请先安装：")
+        for inst in instructions:
+            print(f"  {inst}")
+        print()
+        sys.exit(1)
+
+    print("✅ 环境检查通过")
+    print()
+    print(f"安装目录：")
+    print(f"  REPOS_DIR = {REPOS_DIR}")
+    print(f"  SKILLS_DIR = {SKILLS_DIR}")
+    print()
+
     REPOS_DIR.mkdir(parents=True, exist_ok=True)
     SKILLS_DIR.mkdir(parents=True, exist_ok=True)
 
     print("安装 dev-skill 套件...")
-    print(f"  REPOS_DIR = {REPOS_DIR}")
-    print(f"  SKILLS_DIR = {SKILLS_DIR}")
     print()
 
     failed = []
