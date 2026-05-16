@@ -18,7 +18,8 @@
 
 ```bash
 git clone https://github.com/relunctance/dev-skill.git ~/repos/dev-skill
-python3 ~/repos/dev-skill/scripts/install.py
+cd ~/repos/dev-skill
+bash scripts/setup.sh
 ```
 
 ## 工作流
