@@ -7,12 +7,20 @@ dev-skill install.py — 一键安装所有开发类 skill
 """
 
 import os
+import platform
+import pwd
 import subprocess
 import sys
 from pathlib import Path
 
-REPOS_DIR = Path.home() / "repos"
-SKILLS_DIR = Path.home() / ".hermes" / "skills"
+
+def _real_home() -> Path:
+    """解决 WSL Hermes profile 下 Path.home() 指向 profile 的问题"""
+    return Path(pwd.getpwuid(os.getuid()).pw_dir)
+
+
+REPOS_DIR = _real_home() / "repos"
+SKILLS_DIR = _real_home() / ".hermes" / "skills"
 
 SKILLS = [
     ("base-skill",          "https://github.com/relunctance/base-skill.git"),
@@ -59,6 +67,8 @@ def main():
     SKILLS_DIR.mkdir(parents=True, exist_ok=True)
 
     print("安装 dev-skill 套件...")
+    print(f"  REPOS_DIR = {REPOS_DIR}")
+    print(f"  SKILLS_DIR = {SKILLS_DIR}")
     print()
 
     failed = []
