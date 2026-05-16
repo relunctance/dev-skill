@@ -19,54 +19,57 @@ def _real_home() -> Path:
     return Path(pwd.getpwuid(os.getuid()).pw_dir)
 
 
-def _find_python() -> str:
-    """找可用的 python3"""
-    for name in ("python3", "python"):
-        if shutil.which(name):
-            return name
-    return ""
-
-
-def _find_git() -> str:
-    return shutil.which("git") or ""
-
-
-def _find_pip() -> str:
-    """找可用的 pip（pip3 > pip > pipx）"""
-    for name in ("pip3", "pip", "pipx"):
+def _find_cmd(names: tuple[str, ...]) -> str:
+    for name in names:
         if shutil.which(name):
             return name
     return ""
 
 
 def check_env():
-    """检查环境，返回 (ok, instructions)"""
+    """检查环境，返回 (issues, instructions)"""
     issues = []
     instructions = []
 
-    py = _find_python()
+    py = _find_cmd(("python3", "python"))
     if not py:
         issues.append("python3")
         instructions.append("安装 Python3: https://www.python.org/downloads/")
     else:
-        v = subprocess.run([py, "--version"], capture_output=True, text=True)
-        print(f"  python: {v.stdout.strip()} ({py})")
+        try:
+            v = subprocess.run([py, "--version"], capture_output=True, text=True, timeout=5)
+            print(f"  python: {v.stdout.strip()} ({py})")
+        except Exception:
+            print(f"  python: {py} (无法获取版本)")
 
-    git = _find_git()
+    git = _find_cmd(("git",))
     if not git:
         issues.append("git")
         instructions.append("安装 Git: https://git-scm.com/downloads")
     else:
-        v = subprocess.run(["git", "--version"], capture_output=True, text=True)
-        print(f"  git:    {v.stdout.strip()}")
+        try:
+            v = subprocess.run(["git", "--version"], capture_output=True, text=True, timeout=5)
+            print(f"  git:    {v.stdout.strip()}")
+        except Exception:
+            print("  git:    存在 (无法获取版本)")
 
-    pip = _find_pip()
+    pip = _find_cmd(("pip3", "pip", "pipx"))
     if not pip:
         issues.append("pip")
         instructions.append("安装 pip: python3 -m ensurepip --upgrade 或 https://pip.pypa.io/en/stable/installation/")
     else:
-        v = subprocess.run([pip, "--version"], capture_output=True, text=True)
-        print(f"  pip:    {v.stdout.strip()} ({pip})")
+        try:
+            v = subprocess.run([pip, "--version"], capture_output=True, text=True, timeout=5)
+            first_line = v.stdout.strip().splitlines()[0] if v.stdout.strip() else v.stderr.strip().splitlines()[0]
+            print(f"  pip:    {first_line} ({pip})")
+            # 验证 pip 能执行（简单的 dry-run）
+            subprocess.run([pip, "install", "--dry-run", "pip", "--quiet"], capture_output=True, timeout=10)
+        except subprocess.TimeoutExpired:
+            issues.append(f"pip ({pip} 无响应)")
+            instructions.append("pip 安装可能损坏，重新安装: python3 -m ensurepip --upgrade")
+        except Exception:
+            issues.append(f"pip ({pip} 不可用)")
+            instructions.append("pip 安装可能损坏，重新安装: python3 -m ensurepip --upgrade")
 
     return issues, instructions
 
@@ -84,6 +87,7 @@ SKILLS = [
 
 
 def run(cmd: list[str], cwd: Path | None = None) -> None:
+    print(f"  $ {' '.join(cmd)}")
     subprocess.run(cmd, cwd=cwd, check=True)
 
 
