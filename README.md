@@ -8,11 +8,9 @@
 
 | Skill | 用途 |
 |-------|------|
-| `base-skill` | Agent 初始化套件（一键安装 12 个核心 skills） |
+| `base-skill` | Agent 初始化套件（14 个核心 skills，含 task-split / git-standards） |
 | `plan-review-skill` | 规划评审流程 — LLM 驱动 + 数值 diff 脚本辅助 |
 | `dev-std-skill` | SOP 模板下发 — 自动初始化 + 手动同步 |
-| `task-split-skill` | 任务拆解 — 澄清模板 + 验收标准强制 |
-| `git-standards-skill` | Git 规范 — commit/push 分支策略 |
 
 ## 安装
 
