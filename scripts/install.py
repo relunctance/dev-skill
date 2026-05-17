@@ -79,9 +79,9 @@ SKILLS_DIR = _real_home() / ".hermes" / "skills"
 
 SKILLS = [
     ("base-skill",        "https://github.com/relunctance/base-skill.git"),
-    ("plan-review-skill",  "https://github.com/relunctance/plan-review-skill.git"),
-    ("dev-std-skill",     "https://github.com/relunctance/dev-std-skill.git"),
-    # task-split-skill 和 git-standards-skill 已由 base-skill 包含
+    ("plan-skill",        "https://github.com/relunctance/plan-skill.git"),
+    ("plan-review-skill", "https://github.com/relunctance/plan-review-skill.git"),
+    # task-split-skill、target-skill、git-standards-skill 已由 base-skill 包含
 ]
 
 
